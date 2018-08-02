@@ -22,11 +22,13 @@ def listenThread():
         text.configure(state="normal")
         text.insert(tk.END, t + '\n')
         text.configure(state="disabled")
+        text.see("end")
 
 def sendMessage(text):
     global writer, root
     writer.delete(0, tk.END)
     if text == '/EXIT':
+        write.sendto(bytes(name + " disconnected", 'utf-8'), ('255.255.255.255', 2222))
         write.close()
         try:
             read.close()
@@ -46,6 +48,7 @@ name = input('Please specify your name: ').strip()
 print('To exit the chat type:/EXIT')
 
 root = tk.Tk()
+root.resizable(False, False)
 root.title('NBHS Chat')
 text = tk.Text(root)
 text.configure(state="disabled")
