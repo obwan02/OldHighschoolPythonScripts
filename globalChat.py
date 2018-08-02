@@ -12,11 +12,21 @@ write.setsockopt(s.SOL_SOCKET, s.SO_BROADCAST, 1)
 
 IP = s.gethostbyname(os.environ['COMPUTERNAME'])
 
+people = []
+
 def listenThread():
     global text
     while True:
         msg, add = read.recvfrom(1024)
         ip, port = add
+
+        if msg.beginswith('\r'):
+            #Handle as a request
+            if msg.startswith('\rGET PEOPLE;'):
+                write.sendto(b'\rSEND NAME;' + name, (ip, 2222))
+            if msg.startswith('\rSEND NAME;'):
+                people.append(msg[msg.find(';'):])
+                
             
         t = msg.decode('utf-8')
         text.configure(state="normal")
@@ -57,6 +67,9 @@ writer = tk.Entry(root, width=100)
 writer.bind('<Return>', lambda e: sendMessage(writer.get()))
 writer.grid(column=0, row=1)
 rThread.start()
+
+write.sendto(b'\rGET PEOPLE;', ('255.255.255.255', 2222))
+
 root.mainloop()
     
 
