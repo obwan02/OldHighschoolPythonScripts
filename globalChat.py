@@ -18,27 +18,35 @@ def listenThread():
     global text
     while True:
         msg, add = read.recvfrom(1024)
+        msg = msg.decode('utf-8')
         ip, port = add
 
-        if msg.beginswith('\r'):
+        if msg.startswith('\r'):
             #Handle as a request
             if msg.startswith('\rGET PEOPLE;'):
-                write.sendto(b'\rSEND NAME;' + name, (ip, 2222))
+                p = msg[msg.find(';') + 1:]
+                people.append(p)
+                text.insert(tk.END, p + " has connected.")
+                write.sendto(b'\rSEND NAME;' + bytes(name, 'utf-8'), (ip, 2222))
             if msg.startswith('\rSEND NAME;'):
-                people.append(msg[msg.find(';'):])
-                
-            
-        t = msg.decode('utf-8')
-        text.configure(state="normal")
-        text.insert(tk.END, t + '\n')
-        text.configure(state="disabled")
-        text.see("end")
+                people.append(msg[msg.find(';') + 1:])
+            if msg.startswith('\rDEL NAME;'):
+                try:
+                    people.remove(msg[msg.find(';') + 1:])
+                except ValueError:
+                    print('Bad Name Value')
+        else: 
+            text.configure(state="normal")
+            text.insert(tk.END, msg + '\n')
+            text.configure(state="disabled")
+            text.see("end")
 
 def sendMessage(text):
     global writer, root
     writer.delete(0, tk.END)
     if text == '/EXIT':
         write.sendto(bytes(name + " disconnected", 'utf-8'), ('255.255.255.255', 2222))
+        write.sendto(bytes('DEL NAME;' + name, 'utf-8'), ('255.255.255.255', 2222))
         write.close()
         try:
             read.close()
@@ -54,7 +62,11 @@ def sendMessage(text):
 
 
 rThread = threading.Thread(target=listenThread)
-name = input('Please specify your name: ').strip()
+
+name = ""
+while name == "":
+    name = input('Please specify your name: ').strip()
+    
 print('To exit the chat type:/EXIT')
 
 root = tk.Tk()
@@ -68,7 +80,7 @@ writer.bind('<Return>', lambda e: sendMessage(writer.get()))
 writer.grid(column=0, row=1)
 rThread.start()
 
-write.sendto(b'\rGET PEOPLE;', ('255.255.255.255', 2222))
+write.sendto(b'\rGET PEOPLE;' + bytes(name, 'utf-8'), ('255.255.255.255', 2222))
 
 root.mainloop()
     
