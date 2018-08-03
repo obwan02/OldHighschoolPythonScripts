@@ -26,10 +26,12 @@ def listenThread():
             if msg.startswith('\rGET PEOPLE;'):
                 p = msg[msg.find(';') + 1:]
                 people.append(p)
-                text.insert(tk.END, p + " has connected.")
+                print(p + " has connected.\n")
                 write.sendto(b'\rSEND NAME;' + bytes(name, 'utf-8'), (ip, 2222))
             if msg.startswith('\rSEND NAME;'):
-                people.append(msg[msg.find(';') + 1:])
+                if not ip == IP:
+                    people.append(msg[msg.find(';') + 1:])
+                    print(ip)
             if msg.startswith('\rDEL NAME;'):
                 try:
                     people.remove(msg[msg.find(';') + 1:])
@@ -45,13 +47,16 @@ def sendMessage(text):
     global writer, root
     writer.delete(0, tk.END)
     if text == '/EXIT':
-        write.sendto(bytes(name + " disconnected", 'utf-8'), ('255.255.255.255', 2222))
-        write.sendto(bytes('DEL NAME;' + name, 'utf-8'), ('255.255.255.255', 2222))
-        write.close()
+
         try:
             read.close()
         except OSError:
-            pass
+            print('Failed to close read port')
+        
+        write.sendto(bytes(name + " disconnected", 'utf-8'), ('255.255.255.255', 2222))
+        write.sendto(bytes('\rDEL NAME;' + name, 'utf-8'), ('255.255.255.255', 2222))
+        write.close()
+        
         root.destroy()
         exit(2)
         
@@ -78,9 +83,9 @@ text.grid(column=0, row=0)
 writer = tk.Entry(root, width=100)
 writer.bind('<Return>', lambda e: sendMessage(writer.get()))
 writer.grid(column=0, row=1)
-rThread.start()
 
 write.sendto(b'\rGET PEOPLE;' + bytes(name, 'utf-8'), ('255.255.255.255', 2222))
+rThread.start()
 
 root.mainloop()
     
