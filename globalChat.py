@@ -29,7 +29,6 @@ def listenThread():
         try:    
             msg, add = read.recvfrom(1024)
         except OSError:
-            disconnect()
             root.destroy()
             exit(0)
             return
@@ -38,9 +37,7 @@ def listenThread():
             continue
         msg = msg.decode('utf-8')
         ip, port = add
-
-        print(msg)
-
+        
         if msg.startswith('\r'):
             #Handle as a request
             if msg.startswith('\rGET PEOPLE;'):
@@ -74,7 +71,7 @@ def sendMessage(text):
     if text.strip() == "":
         print("Spam message detected")
         return
-    if time.time() - lastSendTime < 1:
+    if time.time() - lastSendTime < 2:
         print('Sending messages too quickly')
         lastSendTime = time.time()
         return
@@ -82,7 +79,6 @@ def sendMessage(text):
     writer.delete(0, tk.END)
     if text == '/EXIT':
         
-        disconnect()
         root.destroy()
         exit(0)
         
