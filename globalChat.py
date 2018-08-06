@@ -42,7 +42,18 @@ def listenThread():
             #Handle as a request
             if msg.startswith('\rGET PEOPLE;'):
                 p = msg[msg.find(';') + 1:]
-                
+
+
+                #Check for duplicates
+                duplicate = False
+                dupToRemove = None
+                for i in people:
+                    if i[1] == ip:
+                        duplicate = True
+                        dupToRemove = i
+
+                if duplicate:
+                    people.remove(dupToRemove)
                 people.append((p, ip))
                 updatePeople()
                 
@@ -51,7 +62,8 @@ def listenThread():
                 write.sendto(b'\rSEND NAME;' + bytes(name, 'utf-8'), (ip, 2222))
             if msg.startswith('\rSEND NAME;'):
                 if not ip == IP:
-                    people.append((msg[msg.find(';') + 1:], ip))
+                    n = msg[msg.find(';') + 1:]
+                    people.append((n, ip))
                     updatePeople()
             if msg.startswith('\rDEL NAME;'):
                 try:
