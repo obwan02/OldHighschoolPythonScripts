@@ -22,14 +22,20 @@ def addText(txt):
     text.see("end")
 
 def listenThread():
-    global text, people
+    global text, people, root
     while True:
 
         msg, add = (None, None)
         try:    
             msg, add = read.recvfrom(1024)
         except OSError:
-            pass
+            disconnect()
+            root.destroy()
+            exit(0)
+            return
+
+        if msg == None or add == None:
+            continue
         msg = msg.decode('utf-8')
         ip, port = add
 
