@@ -72,7 +72,7 @@ def listenThread():
                 updatePeople()
                 
                 print(p + " has connected.\n")
-                addText(p + " has connected.")
+                addText(p + " has connected.", None, True)
                 write.sendto(b'\rSEND NAME;' + bytes(name, 'utf-8'), (ip, 2222))
             if msg.startswith('\rSEND NAME;'):
                 if not ip == IP:
@@ -91,7 +91,8 @@ def listenThread():
                     privMessages[ip].append(txt)
                 except KeyError:
                     privMessages[ip] = [txt]
-        else: 
+        else:
+            addText(msg, None, True)
             texts.append(msg)
 
 
