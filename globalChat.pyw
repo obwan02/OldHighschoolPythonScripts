@@ -1,14 +1,21 @@
 import socket as s
 import threading
 import time
+import ctypes
 import os
 import tkinter as tk
 
-read = s.socket(s.AF_INET, s.SOCK_DGRAM)
-read.bind(('', 2222))
+write, read = (None, None)
 
-write = s.socket(s.AF_INET, s.SOCK_DGRAM)
-write.setsockopt(s.SOL_SOCKET, s.SO_BROADCAST, 1)
+try:
+    read = s.socket(s.AF_INET, s.SOCK_DGRAM)
+    read.bind(('', 2222))
+
+    write = s.socket(s.AF_INET, s.SOCK_DGRAM)
+    write.setsockopt(s.SOL_SOCKET, s.SO_BROADCAST, 1)
+except OSError as e:
+    ctypes.windll.user32.MessageBoxW(0, 'The NBHS Chat is already open.', 'Already Open', 0)
+    exit(2)
 
 IP = s.gethostbyname(os.environ['COMPUTERNAME'])
 
@@ -145,19 +152,28 @@ def updatePeople():
         peopleList.insert(tk.END, i[0] + ": " + i[1])
 
 def openPrivMsg(e):
+    global selected
     index = peopleList.curselection()[0]
     item = people[int(index)]
 
     if selected == item:
         return
+
+    if selected == 'GLOBAL' and item[1] == IP:
+        return
     
     if item[1] == IP:
         selected = 'GLOBAL'
-
     text.delete(0, tk.END)
 
-    for i in texts:
-        text.insert(tk.END, i)
+    if selected == 'GLOBAL':
+        for i in texts:
+            text.insert(tk.END, i)
+    else:
+        t = privMessages[item[1]]
+        for i in t:
+            test.insert(tk.END, i)
+        
     
 
 selected = 'GLOBAL'
