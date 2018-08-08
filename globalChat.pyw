@@ -4,7 +4,7 @@ import time
 import ctypes
 import os
 import tkinter as tk
-
+#lol xD 
 write, read = (None, None)
 
 try:
@@ -105,6 +105,7 @@ def listenThread():
                     privMessages[ip].append(txt)
                 except KeyError:
                     privMessages[ip] = [txt]
+                    addText(msg, ip, False)
         else:
             addText(msg, None, True)
             texts.append(msg)
@@ -132,8 +133,14 @@ def sendMessage(txt):
     if selected == 'GLOBAL':      
         write.sendto(bytes(name + ": " + txt, 'utf-8'), ('255.255.255.255', 2222))
     else:
-        write.sendto(bytes('\rPRIV' + ";" + txt, 'utf-8'), ('255.255.255.255', 2222))
-        text.insert(tk.END, txt)
+        n, ip = selected
+
+        write.sendto(bytes('\rPRIV' + ';' + name + ": " + txt, 'utf-8'), (ip, 2222))
+
+        text.configure(state="normal")
+        text.insert(tk.END, "You: " + txt + "\n")
+        text.configure(state="disabled")
+        privMessages[ip].append(txt)
         
 
 def disconnect():
@@ -145,6 +152,7 @@ def disconnect():
     write.sendto(bytes(name + " disconnected", 'utf-8'), ('255.255.255.255', 2222))
     write.sendto(bytes('\rDEL NAME;' + name, 'utf-8'), ('255.255.255.255', 2222))
     write.close()
+    exit(0)
 
 def updatePeople():
     global people, peopleList
