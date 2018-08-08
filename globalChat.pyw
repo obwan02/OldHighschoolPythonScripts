@@ -38,7 +38,7 @@ def addText(txt, ip, isGlobal):
     else:
         if selected == 'GLOBAL':
             return
-        elif selected[1] != ip:
+        if selected[1] != ip:
             return
         
     
@@ -183,11 +183,11 @@ def openPrivMsg(e):
 
     if selected == 'GLOBAL':
         for i in texts:
-            text.insert(tk.END, i)
+            text.insert(tk.END, i + "\n")
     else:
         t = privMessages[item[1]]
         for i in t:
-            text.insert(tk.END, i)
+            text.insert(tk.END, i + "\n")
     text.configure(state="disabled")
         
     
