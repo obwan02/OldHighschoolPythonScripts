@@ -103,6 +103,7 @@ def listenThread():
                 txt = msg[msg.find(';') + 1:]
                 try:
                     privMessages[ip].append(txt)
+                    addText(msg, ip, False)
                 except KeyError:
                     privMessages[ip] = [txt]
                     addText(msg, ip, False)
@@ -140,7 +141,7 @@ def sendMessage(txt):
         text.configure(state="normal")
         text.insert(tk.END, "You: " + txt + "\n")
         text.configure(state="disabled")
-        privMessages[ip].append(txt)
+        privMessages[ip].append("You: " + txt)
         
 
 def disconnect():
