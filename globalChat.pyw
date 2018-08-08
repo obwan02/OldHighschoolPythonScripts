@@ -25,10 +25,15 @@ def sendPrivateMessage(peep:tuple, msg):
 def addText(txt, ip, isGlobal):
     global text
 
-    if isGlobal and selected != 'GLOBAL':
-        return
-    if isGlobal == False and ip != selected[1]:
-        return
+    if isGlobal:
+        if selected != 'GLOBAL':
+            return
+    else:
+        if selected == 'GLOBAL':
+            return
+        elif selected[1] != ip:
+            return
+        
     
     text.configure(state="normal")
     text.insert(tk.END, txt + '\n')
