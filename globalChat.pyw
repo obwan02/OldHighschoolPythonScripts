@@ -25,10 +25,6 @@ people = []
 privMessages = {}
 texts = []
 
-def sendPrivateMessage(peep:tuple, msg):
-    global write
-    write.sendto(bytes('\rPRIV;') + bytes(peep[0]) + b': ' + bytes(msg), (peep[1], 2222))
-
 def addText(txt, ip, isGlobal):
     global text
 
@@ -46,6 +42,11 @@ def addText(txt, ip, isGlobal):
     text.insert(tk.END, txt + '\n')
     text.configure(state="disabled")
     text.see("end")
+
+    if isGlobal:
+        texts.append(txt)
+    else:
+        privMessages[ip].append(txt)
 
 def listenThread():
     global text, people, root
@@ -102,7 +103,6 @@ def listenThread():
             if msg.startswith('\rPRIV;'):
                 txt = msg[msg.find(';') + 1:]
                 try:
-                    privMessages[ip].append(txt)
                     addText(msg, ip, False)
                 except KeyError:
                     privMessages[ip] = [txt]
@@ -167,20 +167,13 @@ def openPrivMsg(e):
     global selected, text
     index = peopleList.curselection()[0]
     item = people[int(index)]
-
-    if selected == item:
-        return
-
-    if selected == 'GLOBAL' and item[1] == IP:
-        return
     
-    if item[1] == IP:
-        selected = 'GLOBAL'
-
     text.configure(state="normal")
     text.delete("1.0", tk.END)
 
     selected = item
+    if item[1] == IP:
+        selected = 'GLOBAL'
 
     if selected == 'GLOBAL':
         for i in texts:
