@@ -49,7 +49,10 @@ def addText(txt, ip, isGlobal):
         privMessages[ip].append(txt)
 
 def listenThread():
-    global text, people, root
+    global text, people, root, writer
+
+    write.sendto(b'\rGET PEOPLE;' + bytes(name, 'utf-8'), ('255.255.255.255', 2222))
+    
     while True:
 
         msg, add = (None, None)
@@ -102,11 +105,7 @@ def listenThread():
                     print('Bad Name Value')
             if msg.startswith('\rPRIV;'):
                 txt = msg[msg.find(';') + 1:]
-                try:
-                    addText(msg, ip, False)
-                except KeyError:
-                    privMessages[ip] = [txt]
-                    addText(msg, ip, False)
+                addText(txt, ip, False)
         else:
             addText(msg, None, True)
             texts.append(msg)
@@ -211,9 +210,7 @@ writer = tk.Entry(root, width=100)
 writer.bind('<Return>', lambda e: sendMessage(writer.get()))
 writer.grid(column=0, row=1, rowspan=1)
 
-write.sendto(b'\rGET PEOPLE;' + bytes(name, 'utf-8'), ('255.255.255.255', 2222))
 rThread.start()
-
 root.mainloop()
     
 
