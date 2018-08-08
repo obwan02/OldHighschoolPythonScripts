@@ -81,6 +81,7 @@ def listenThread():
                 if duplicate:
                     people.remove(dupToRemove)
                 people.append((p, ip))
+                privMessages[ip] = []
                 updatePeople()
                 
                 print(p + " has connected.\n")
@@ -90,6 +91,7 @@ def listenThread():
                 if not ip == IP:
                     n = msg[msg.find(';') + 1:]
                     people.append((n, ip))
+                    privMessages[ip] = []
                     updatePeople()
             if msg.startswith('\rDEL NAME;'):
                 try:
@@ -110,10 +112,10 @@ def listenThread():
 
 lastSendTime = 0
 
-def sendMessage(text):
-    global writer, root, people, lastSendTime
+def sendMessage(txt):
+    global writer, root, people, lastSendTime, text
 
-    if text.strip() == "":
+    if txt.strip() == "":
         print("Spam message detected")
         return
     if time.time() - lastSendTime < 2:
@@ -122,15 +124,16 @@ def sendMessage(text):
         return
     
     writer.delete(0, tk.END)
-    if text == '/EXIT':
+    if txt == '/EXIT':
         
         root.destroy()
         exit(0)
         
     if selected == 'GLOBAL':      
-        write.sendto(bytes(name + ": " + text, 'utf-8'), ('255.255.255.255', 2222))
+        write.sendto(bytes(name + ": " + txt, 'utf-8'), ('255.255.255.255', 2222))
     else:
-        write.sendto(bytes('\rPRIV' + ";" + text, 'utf-8'), ('255.255.255.255', 2222))
+        write.sendto(bytes('\rPRIV' + ";" + txt, 'utf-8'), ('255.255.255.255', 2222))
+        text.insert(tk.END, txt)
         
 
 def disconnect():
@@ -152,7 +155,7 @@ def updatePeople():
         peopleList.insert(tk.END, i[0] + ": " + i[1])
 
 def openPrivMsg(e):
-    global selected
+    global selected, text
     index = peopleList.curselection()[0]
     item = people[int(index)]
 
@@ -164,7 +167,11 @@ def openPrivMsg(e):
     
     if item[1] == IP:
         selected = 'GLOBAL'
-    text.delete(0, tk.END)
+
+    text.configure(state="normal")
+    text.delete("1.0", tk.END)
+
+    selected = item
 
     if selected == 'GLOBAL':
         for i in texts:
@@ -172,7 +179,8 @@ def openPrivMsg(e):
     else:
         t = privMessages[item[1]]
         for i in t:
-            test.insert(tk.END, i)
+            text.insert(tk.END, i)
+    text.configure(state="disabled")
         
     
 
