@@ -111,13 +111,17 @@ def listenThread():
 
 
 lastSendTime = 0
-
+lastMessage = ""
 def sendMessage(txt):
     global writer, root, people, lastSendTime, text
 
     if txt.strip() == "":
         print("Spam message detected")
         return
+
+    if lastMessage == txt:
+        print("Spam detected")
+    
     if time.time() - lastSendTime < 2:
         print('Sending messages too quickly')
         lastSendTime = time.time()
@@ -140,7 +144,7 @@ def sendMessage(txt):
         text.insert(tk.END, "You: " + txt + "\n")
         text.configure(state="disabled")
         privMessages[ip].append("You: " + txt)
-        
+    lastMessage = txt
 
 def disconnect():
     try:
@@ -151,6 +155,7 @@ def disconnect():
     write.sendto(bytes(name + " disconnected", 'utf-8'), ('255.255.255.255', 2222))
     write.sendto(bytes('\rDEL NAME;' + name, 'utf-8'), ('255.255.255.255', 2222))
     write.close()
+    
     exit(0)
 
 def updatePeople():
