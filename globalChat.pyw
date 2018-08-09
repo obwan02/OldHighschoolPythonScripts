@@ -7,16 +7,24 @@ import tkinter as tk
 #lol xD 
 write, read = (None, None)
 
-try:
-    read = s.socket(s.AF_INET, s.SOCK_DGRAM)
-    read.bind(('', 2222))
+t = 0
+while True:
+    try:
+        read = s.socket(s.AF_INET, s.SOCK_DGRAM)
+        read.bind(('', 2222))
 
-    write = s.socket(s.AF_INET, s.SOCK_DGRAM)
-    write.setsockopt(s.SOL_SOCKET, s.SO_BROADCAST, 1)
-except OSError as e:
-    ctypes.windll.user32.MessageBoxW(0, 'The NBHS Chat is already open.', 'Already Open', 0)
-    exit(2)
-
+        write = s.socket(s.AF_INET, s.SOCK_DGRAM)
+        write.setsockopt(s.SOL_SOCKET, s.SO_BROADCAST, 1)
+        break
+    except OSError as e:
+        print('Restarting')
+        hwnd = ctypes.windll.user32.FindWindowW(None, 'NBHS Chat')
+        if ctypes.windll.user32.PostMessageW(hwnd, 0x0010, 0, 0) == 0:
+            print('Fail')
+            t += 1
+    if t > 10:
+        exit(2)
+    
 IP = s.gethostbyname(os.environ['COMPUTERNAME'])
 
 people = []
