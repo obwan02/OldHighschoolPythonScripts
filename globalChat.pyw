@@ -108,7 +108,6 @@ def listenThread():
                 addText(txt, ip, False)
         else:
             addText(msg, None, True)
-            texts.append(msg)
 
 
 lastSendTime = 0
