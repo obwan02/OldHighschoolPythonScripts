@@ -39,7 +39,10 @@ def addText(txt, ip, isGlobal):
         
     
     text.configure(state="normal")
-    text.insert(tk.END, txt + '\n')
+    if ip == IP:
+        text.insert(tk.END, txt + '\n', 'my')
+    else:
+        text.insert(tk.END, txt + '\n')
     text.configure(state="disabled")
     text.see("end")
 
@@ -107,13 +110,18 @@ def listenThread():
                 txt = msg[msg.find(';') + 1:]
                 addText(txt, ip, False)
         else:
-            addText(msg, None, True)
+            addText(msg, ip, True)
+                
 
 
 lastSendTime = 0
 lastMessage = ""
 def sendMessage(txt):
-    global writer, root, people, lastSendTime, text
+    global writer, root, people, lastSendTime, text, lastMessage
+
+    name == os.environ['USERNAME']
+
+    writer.delete(0, tk.END)
 
     if txt.strip() == "":
         print("Spam message detected")
@@ -121,13 +129,14 @@ def sendMessage(txt):
 
     if lastMessage == txt:
         print("Spam detected")
-    
-    if time.time() - lastSendTime < 2:
-        print('Sending messages too quickly')
-        lastSendTime = time.time()
         return
     
-    writer.delete(0, tk.END)
+    if time.time() - lastSendTime < 0.4:
+        print('Sending messages too quickly')
+        return
+
+    lastSendTime = time.time()
+
     if txt == '/EXIT':
         
         root.destroy()
@@ -141,7 +150,7 @@ def sendMessage(txt):
         write.sendto(bytes('\rPRIV' + ';' + name + ": " + txt, 'utf-8'), (ip, 2222))
 
         text.configure(state="normal")
-        text.insert(tk.END, "You: " + txt + "\n")
+        text.insert(tk.END, "You: " + txt + "\n", 'my')
         text.configure(state="disabled")
         privMessages[ip].append("You: " + txt)
     lastMessage = txt
@@ -180,11 +189,17 @@ def openPrivMsg(e):
 
     if selected == 'GLOBAL':
         for i in texts:
-            text.insert(tk.END, i + "\n")
+            if i.startswith(name + ':'):
+                text.insert(tk.END, i + "\n", 'my')
+            else:
+                text.insert(tk.END, i + '\n')
     else:
         t = privMessages[item[1]]
         for i in t:
-            text.insert(tk.END, i + "\n")
+            if i.startswith('You:'):
+                text.insert(tk.END, i + "\n", 'my')
+            else:
+                text.insert(tk.END, i + '\n')
     text.configure(state="disabled")
         
     
@@ -204,6 +219,7 @@ root.title('NBHS Chat')
 
 text = tk.Text(root)
 text.configure(state="disabled")
+text.tag_configure('my', justify=tk.RIGHT)
 text.grid(column=0, row=0)
 
 peopleList = tk.Listbox(root)
